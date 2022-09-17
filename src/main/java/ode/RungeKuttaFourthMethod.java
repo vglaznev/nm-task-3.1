@@ -7,20 +7,20 @@ public class RungeKuttaFourthMethod {
     protected double[] initialValues;
     private double x0;
 
-    private int n;
     private double step;
     private double[] nodes;
 
-    public RungeKuttaFourthMethod(ODE[] odes, double[] initialValues, double x0, int n, double step, double[] nodes) {
+    public RungeKuttaFourthMethod(ODE[] odes, double[] initialValues, double x0, double step, double[] nodes) {
         this.odes = odes;
         this.initialValues = initialValues;
         this.x0 = x0;
-        this.n = n;
         this.step = step;
         this.nodes = nodes;
     }
 
     public TableFunction[] solve() {
+        int n = nodes.length;
+
         double[] solution0 = new double[n];
         double[] solution1 = new double[n];
 
