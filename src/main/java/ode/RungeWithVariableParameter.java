@@ -4,7 +4,7 @@ import function.TableFunction;
 
 public class RungeWithVariableParameter extends RungeKuttaFourthMethod {
 
-    public RungeWithVariableParameter(ODE[] odes, double initialValue0, double x0, double step, double[] nodes) {
+    public RungeWithVariableParameter(ThreeArgumentFunction[] odes, double initialValue0, double x0, double step, double[] nodes) {
         super(odes, new double[]{initialValue0, 0}, x0, step, nodes);
     }
 

@@ -3,14 +3,14 @@ package ode;
 import function.TableFunction;
 
 public class RungeKuttaFourthMethod {
-    private ODE[] odes;
+    private ThreeArgumentFunction[] odes;
     protected double[] initialValues;
     private double x0;
 
     private double step;
     private double[] nodes;
 
-    public RungeKuttaFourthMethod(ODE[] odes, double[] initialValues, double x0, double step, double[] nodes) {
+    public RungeKuttaFourthMethod(ThreeArgumentFunction[] odes, double[] initialValues, double x0, double step, double[] nodes) {
         this.odes = odes;
         this.initialValues = initialValues;
         this.x0 = x0;
@@ -47,8 +47,8 @@ public class RungeKuttaFourthMethod {
             k0_4 = step * odes[0].apply(previousX + step, previousY0 + k0_3, previousY1 + k1_3);
             k1_4 = step * odes[1].apply(previousX + step, previousY0 + k0_3, previousY1 + k1_3);
 
-            solution0[i] = solution0[i + 1] + 1 / 6 * (k0_1 + 2 * k0_2 + 2 * k0_3 + k0_4);
-            solution1[i] = solution1[i + 1] + 1 / 6 * (k1_1 + 2 * k1_2 + 2 * k1_3 + k1_4);
+            solution0[i] = solution0[i + 1] - (k0_1 + 2 * k0_2 + 2 * k0_3 + k0_4) / 6;
+            solution1[i] = solution1[i + 1] - (k1_1 + 2 * k1_2 + 2 * k1_3 + k1_4) / 6;
         }
 
         return new TableFunction[]{

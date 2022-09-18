@@ -1,48 +1,46 @@
+import function.Function;
+import function.FunctionUtil;
+import function.SimpleFunction;
 import function.TableFunction;
-import ode.ODE;
-import ode.RungeKuttaFourthMethod;
-import ode.RungeWithVariableParameter;
+import ode.FiveArgumentFunction;
+import ode.ThreeArgumentFunction;
+import splitter.UniformSplitter;
 
-import java.util.function.UnaryOperator;
+import java.awt.*;
+
+import static java.lang.Math.exp;
+
 
 public class Main {
     public static void main(String[] args) {
-        double beginOfInterval;
-        double endOfInterval = 0; //remove
-        double initialValueOnEnd;
+        double beginOfInterval = 0, endOfInterval = 1;
+        int numberOfDots = 20;
 
-        double[] nodes = null; //remove
-        double step = 0; //remove
-
-        ODE[] ODEs = new ODE[]{
-                (x, u, w) -> 0, //u'
-                (x, u, w) -> 0 //w'
-        };
-        double A = 0, B = 0;
-
-        RungeWithVariableParameter method1 = new RungeWithVariableParameter(ODEs,
-                B, endOfInterval, step, nodes);
-
-        UnaryOperator<Double> phi =
-                x -> {
-                    TableFunction[] solutions = method1.solve();
-                    return solutions[1].x()[0] - A;
-                };
-
-        ODE[] derivativeODEs = new ODE[]{
-                (x, du_da, dw_da) -> dw_da, // du/da
-                (x, du_da, dw_da) -> df_du * du_da + df_dw * dw_da // dw/da
-        };
-
-        double[] derivativeInitialValues = new double[]{0, 1}; // du/da = 0 при x = b, dw/da = 1 при x = b
-        RungeKuttaFourthMethod method = new RungeKuttaFourthMethod(derivativeODEs,
-                derivativeInitialValues, endOfInterval, step, nodes);
-        TableFunction[] solutions = method.solve();
-        double phiDerivative = solutions[1].x()[0];
+        ShootingMethod method = new ShootingMethod.Builder()
+                .system(
+                        new ThreeArgumentFunction[]{
+                                (x, u, w) -> w, //u'
+                                (x, u, w) -> 1 - w //w'
+                        })
+                .derivativeSystem(
+                        new FiveArgumentFunction[]{
+                                (x, u, w, du_da, dw_da) -> dw_da, //du_da
+                                (x, u, w, du_da, dw_da) -> /*0 * du_da + 1 **/ - dw_da, //dw_da
+                        }
+                )
+                .initialValues(0, 1)
+                .nodes((new UniformSplitter()).split(beginOfInterval, endOfInterval, numberOfDots))
+                .step((endOfInterval - beginOfInterval) / (numberOfDots - 1))
+                .build();
+        var sol = method.solve(1, 0.00001);
+        System.out.println(sol);
 
 
-        UnaryOperator<Integer> func = x -> 5;
-        UnaryOperator<Double> func2 = x -> nodes[func.apply(1)];
-
+        Plotter plotter = new Plotter();
+        plotter.addGraphic(FunctionUtil.getTableFunction(new SimpleFunction(x -> x + 1 / exp(x) - 1 / exp(1)), beginOfInterval, endOfInterval, 1000), "u analytic", Color.black);
+        plotter.addGraphic(FunctionUtil.getTableFunction(new SimpleFunction(x -> 1 - 1 / exp(x)), beginOfInterval, endOfInterval, 1000), "u der analytic", Color.green);
+        plotter.addGraphic(method.getSolution(sol)[0], "u numeric", Color.red);
+        plotter.addGraphic(method.getSolution(sol)[1], "u der numeric", Color.orange);
+        plotter.display();
     }
 }
