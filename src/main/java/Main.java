@@ -7,14 +7,24 @@ import ode.ThreeArgumentFunction;
 import splitter.UniformSplitter;
 
 import java.awt.*;
+import java.util.Arrays;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
+import static java.lang.Math.abs;
 import static java.lang.Math.exp;
 
 
 public class Main {
+    private static final int PLOTTER_RESOLUTION = 1000;
+
     public static void main(String[] args) {
         double beginOfInterval = 0, endOfInterval = 1;
-        int numberOfDots = 20;
+        int numberOfDots = 5;
+        double[] nodes = (new UniformSplitter()).split(beginOfInterval, endOfInterval, numberOfDots);
+
+        Function analyticSolution = new SimpleFunction(x -> x + 1 / exp(x) - 1 / exp(1));
+        Function analyticSolutionDerivative = new SimpleFunction(x -> 1 - 1 / exp(x));
 
         ShootingMethod method = new ShootingMethod.Builder()
                 .system(
@@ -29,18 +39,31 @@ public class Main {
                         }
                 )
                 .initialValues(0, 1)
-                .nodes((new UniformSplitter()).split(beginOfInterval, endOfInterval, numberOfDots))
+                .nodes(nodes)
                 .step((endOfInterval - beginOfInterval) / (numberOfDots - 1))
                 .build();
-        var sol = method.solve(1, 0.00001);
-        System.out.println(sol);
+        var shootingParameter = method.solve(1, 0.01);
+        System.out.println(shootingParameter);
+
+        var solution = method.getSolution(shootingParameter);
 
 
         Plotter plotter = new Plotter();
-        plotter.addGraphic(FunctionUtil.getTableFunction(new SimpleFunction(x -> x + 1 / exp(x) - 1 / exp(1)), beginOfInterval, endOfInterval, 1000), "u analytic", Color.black);
-        plotter.addGraphic(FunctionUtil.getTableFunction(new SimpleFunction(x -> 1 - 1 / exp(x)), beginOfInterval, endOfInterval, 1000), "u der analytic", Color.green);
-        plotter.addGraphic(method.getSolution(sol)[0], "u numeric", Color.red);
-        plotter.addGraphic(method.getSolution(sol)[1], "u der numeric", Color.orange);
+        plotter.addGraphic(FunctionUtil.getTableFunction(analyticSolution, beginOfInterval, endOfInterval, PLOTTER_RESOLUTION), "u аналитическое", Color.black);
+        plotter.addGraphic(FunctionUtil.getTableFunction(analyticSolutionDerivative, beginOfInterval, endOfInterval, PLOTTER_RESOLUTION), "u'(w) аналитическое", Color.green);
+        plotter.addGraphic(solution[0], "u численное", Color.red);
+        plotter.addGraphic(solution[1], "u'(w) численное", Color.orange);
         plotter.display();
+
+        double[] x = nodes;
+        double[] u = Arrays.stream(nodes).map(analyticSolution::getY).toArray();
+        double[] w = Arrays.stream(nodes).map(analyticSolutionDerivative::getY).toArray();
+        double[] deltaU = IntStream.range(0, nodes.length).mapToDouble(i -> abs(u[i] - solution[0].y()[i])).toArray();
+        double[] deltaW = IntStream.range(0, nodes.length).mapToDouble(i -> abs(w[i] - solution[1].y()[i])).toArray();
+        var table = IntStream.range(0, nodes.length).mapToObj(i -> new double[]{nodes[i], u[i], deltaU[i], w[i], deltaW[i]}).toArray(double[][]::new);
+        int numberOfRows = 3;
+        System.out.println("x u delta_U u' delta_U'");
+        Arrays.stream(table).limit(numberOfRows).forEach(row -> System.out.println(Arrays.toString(row)));
+        Arrays.stream(table).skip(nodes.length - numberOfRows).forEach(row -> System.out.println(Arrays.toString(row)));
     }
 }
