@@ -11,8 +11,7 @@ import java.util.Arrays;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static java.lang.Math.abs;
-import static java.lang.Math.exp;
+import static java.lang.Math.*;
 
 
 public class Main {
@@ -20,29 +19,30 @@ public class Main {
 
     public static void main(String[] args) {
         double beginOfInterval = 0, endOfInterval = 1;
-        int numberOfDots = 5;
+        int numberOfDots = 80;
         double[] nodes = (new UniformSplitter()).split(beginOfInterval, endOfInterval, numberOfDots);
 
-        Function analyticSolution = new SimpleFunction(x -> x + 1 / exp(x) - 1 / exp(1));
-        Function analyticSolutionDerivative = new SimpleFunction(x -> 1 - 1 / exp(x));
+        Function analyticSolution = new SimpleFunction(x -> 1 + exp(2 * x));
+        Function analyticSolutionDerivative = new SimpleFunction(x -> 2 * exp(2 * x));
 
         ShootingMethod method = new ShootingMethod.Builder()
                 .system(
                         new ThreeArgumentFunction[]{
                                 (x, u, w) -> w, //u'
-                                (x, u, w) -> 1 - w //w'
+                                (x, u, w) -> (pow(w, 2) * (w - u + 1)) / pow(u - 1, 2) //w'
                         })
                 .derivativeSystem(
                         new FiveArgumentFunction[]{
                                 (x, u, w, du_da, dw_da) -> dw_da, //du_da
-                                (x, u, w, du_da, dw_da) -> /*0 * du_da + 1 **/ - dw_da, //dw_da
+                                (x, u, w, du_da, dw_da) -> -(pow(w.getY(x), 2) / pow(u.getY(x) - 1, 2) + (2 * pow(w.getY(x), 2) * (w.getY(x) - u.getY(x) + 1)) / pow(u.getY(x) - 1, 3)) * du_da
+                                        + (pow(w.getY(x), 2) / pow(u.getY(x) - 1, 2) + (2 * w.getY(x) * (w.getY(x) - u.getY(x) + 1)) / pow(u.getY(x) - 1, 2)) * dw_da, //dw_da
                         }
                 )
-                .initialValues(0, 1)
+                .initialValues(2, 1 + exp(2))
                 .nodes(nodes)
                 .step((endOfInterval - beginOfInterval) / (numberOfDots - 1))
                 .build();
-        var shootingParameter = method.solve(1, 0.01);
+        var shootingParameter = method.solve(15, 0.001);
         System.out.println(shootingParameter);
 
         var solution = method.getSolution(shootingParameter);
