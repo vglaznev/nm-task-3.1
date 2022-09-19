@@ -38,14 +38,14 @@ public class RungeKuttaFourthMethod {
             k0_1 = step * odes[0].apply(previousX, previousY0, previousY1);
             k1_1 = step * odes[1].apply(previousX, previousY0, previousY1);
 
-            k0_2 = step * odes[0].apply(previousX + step / 2, previousY0 + k0_1 / 2, previousY1 + k1_1 / 2);
-            k1_2 = step * odes[1].apply(previousX + step / 2, previousY0 + k0_1 / 2, previousY1 + k1_1 / 2);
+            k0_2 = step * odes[0].apply(previousX - step / 2, previousY0 + k0_1 / 2, previousY1 - k1_1 / 2);
+            k1_2 = step * odes[1].apply(previousX - step / 2, previousY0 + k0_1 / 2, previousY1 - k1_1 / 2);
 
-            k0_3 = step * odes[0].apply(previousX + step / 2, previousY0 + k0_2 / 2, previousY1 + k1_2 / 2);
-            k1_3 = step * odes[1].apply(previousX + step / 2, previousY0 + k0_2 / 2, previousY1 + k1_2 / 2);
+            k0_3 = step * odes[0].apply(previousX - step / 2, previousY0 - k0_2 / 2, previousY1 - k1_2 / 2);
+            k1_3 = step * odes[1].apply(previousX - step / 2, previousY0 - k0_2 / 2, previousY1 - k1_2 / 2);
 
-            k0_4 = step * odes[0].apply(previousX + step, previousY0 + k0_3, previousY1 + k1_3);
-            k1_4 = step * odes[1].apply(previousX + step, previousY0 + k0_3, previousY1 + k1_3);
+            k0_4 = step * odes[0].apply(previousX - step, previousY0 - k0_3, previousY1 - k1_3);
+            k1_4 = step * odes[1].apply(previousX - step, previousY0 - k0_3, previousY1 - k1_3);
 
             solution0[i] = solution0[i + 1] - (k0_1 + 2 * k0_2 + 2 * k0_3 + k0_4) / 6;
             solution1[i] = solution1[i + 1] - (k1_1 + 2 * k1_2 + 2 * k1_3 + k1_4) / 6;
