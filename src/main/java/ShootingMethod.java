@@ -7,6 +7,7 @@ import ode.FiveArgumentFunction;
 import ode.ThreeArgumentFunction;
 import ode.RungeKuttaFourthMethod;
 import ode.RungeWithVariableParameter;
+import splitter.UniformSplitter;
 
 public class ShootingMethod extends NewtonMethod {
 
@@ -40,8 +41,9 @@ public class ShootingMethod extends NewtonMethod {
     }
 
     private double calculatePhi(double shootingParameter) {
+        var nodes2 = new UniformSplitter().split(nodes[0], nodes[nodes.length - 1], 2 * nodes.length + 1);
         RungeWithVariableParameter method = new RungeWithVariableParameter(system,
-                B, nodes[nodes.length - 1], step, nodes);
+                B, nodes2[nodes2.length - 1], nodes2[1]- nodes2[0], nodes2);
         var solution = method.solve(shootingParameter);
         currentU = new InterpolationPolynomial(solution[0].x(), solution[0].y(), interpolationAlgorithm);
         currentW = new InterpolationPolynomial(solution[1].x(), solution[1].y(), interpolationAlgorithm);
@@ -53,8 +55,9 @@ public class ShootingMethod extends NewtonMethod {
     }
 
     public TableFunction[] getSolution(double shootingParameter) {
+        var nodes2 = new UniformSplitter().split(nodes[0], nodes[nodes.length - 1], 2 * nodes.length + 1);
         RungeWithVariableParameter method = new RungeWithVariableParameter(system,
-                B, nodes[nodes.length - 1], step, nodes);
+                B, nodes2[nodes2.length - 1], nodes2[1]- nodes2[0], nodes2);
         var solution = method.solve(shootingParameter);
         return solution;
     }

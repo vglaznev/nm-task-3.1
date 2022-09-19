@@ -2,6 +2,9 @@ import function.Function;
 import function.FunctionUtil;
 import function.SimpleFunction;
 import function.TableFunction;
+import interpolation.AitkenScheme;
+import interpolation.InterpolationPolynomial;
+import interpolation.builder.InterpolationPolynomialBuilder;
 import ode.FiveArgumentFunction;
 import ode.ThreeArgumentFunction;
 import splitter.UniformSplitter;
@@ -19,7 +22,7 @@ public class Main {
 
     public static void main(String[] args) {
         double beginOfInterval = 0, endOfInterval = 1;
-        int numberOfDots = 80;
+        int numberOfDots = 25;
         double[] nodes = (new UniformSplitter()).split(beginOfInterval, endOfInterval, numberOfDots);
 
         Function analyticSolution = new SimpleFunction(x -> 1 + exp(2 * x));
@@ -42,7 +45,7 @@ public class Main {
                 .nodes(nodes)
                 .step((endOfInterval - beginOfInterval) / (numberOfDots - 1))
                 .build();
-        var shootingParameter = method.solve(15, 0.001);
+        var shootingParameter = method.solve(12, 0.0000000001);
         System.out.println(shootingParameter);
 
         var solution = method.getSolution(shootingParameter);
@@ -65,5 +68,6 @@ public class Main {
         System.out.println("x u delta_U u' delta_U'");
         Arrays.stream(table).limit(numberOfRows).forEach(row -> System.out.println(Arrays.toString(row)));
         Arrays.stream(table).skip(nodes.length - numberOfRows).forEach(row -> System.out.println(Arrays.toString(row)));
+
     }
 }
