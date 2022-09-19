@@ -22,7 +22,7 @@ public class Main {
 
     public static void main(String[] args) {
         double beginOfInterval = 0, endOfInterval = 1;
-        int numberOfDots = 25;
+        int numberOfDots = 10;
         double[] nodes = (new UniformSplitter()).split(beginOfInterval, endOfInterval, numberOfDots);
 
         Function analyticSolution = new SimpleFunction(x -> 1 + exp(2 * x));
@@ -45,7 +45,7 @@ public class Main {
                 .nodes(nodes)
                 .step((endOfInterval - beginOfInterval) / (numberOfDots - 1))
                 .build();
-        var shootingParameter = method.solve(12, 0.0000000001);
+        var shootingParameter = method.solve(12, 0.001);
         System.out.println(shootingParameter);
 
         var solution = method.getSolution(shootingParameter);
